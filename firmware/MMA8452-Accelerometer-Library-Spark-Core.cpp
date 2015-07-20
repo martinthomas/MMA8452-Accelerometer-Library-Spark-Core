@@ -75,13 +75,13 @@ byte MMA8452Q::init(MMA8452Q_Scale fsr, MMA8452Q_ODR odr)
 //		  those 12-bit values. These variables are in units of g's.
 void MMA8452Q::read()
 {
-	signed char rawData[6];  // x/y/z accel register data stored here
+	byte rawData[6];  // x/y/z accel register data stored here
 
 	readRegisters(OUT_X_MSB, rawData, 6);  // Read the six raw data registers into data array
 	
-	x = (rawData[0] * 256 + rawData[1]) /16;
-	y = (rawData[2] * 256 + rawData[3]) /16;
-	z = (rawData[4] * 256 + rawData[5]) /16;
+	x = ((rawData[0] << 8) & 0xff00) | rawData[1]) /16;
+	y = ((rawData[2] << 8) & 0xff00) | rawData[3]) /16;
+	z = ((rawData[4] << 8) & 0xff00) | rawData[5]) /16;
 	cx = (float) x / (float)(1<<11) * (float)(scale);
 	cy = (float) y / (float)(1<<11) * (float)(scale);
 	cz = (float) z / (float)(1<<11) * (float)(scale);
