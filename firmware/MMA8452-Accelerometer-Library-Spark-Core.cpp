@@ -136,10 +136,15 @@ void MMA8452Q::setupMotionThresh(uint8_t thresh, uint8_t bounces, bool debouncem
 	writeRegister(FF_MT_COUNT, bounces);
 }
 
-bool MMA8452Q::readMotion(uint8_t result)
+byte MMA8452Q::readMotion()
 {
-    result = readRegister(FF_MT_SRC);
-    return result & 0x80;
+	byte result = readRegister(FF_MT_SRC);
+    if (result & 0x80) // Read EA bit to check if a interrupt was generated
+	{
+		return result & 0x7F;
+	}
+	else
+		return 0;
 }
 
 // SET THE OUTPUT DATA RATE

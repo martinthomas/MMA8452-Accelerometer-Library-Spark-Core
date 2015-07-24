@@ -104,7 +104,7 @@ public:
 	byte available();
 	byte readTap();
 	byte readPL();
-	bool readMotion(uint8_t result);
+	byte readMotion();
 
     int16_t x, y, z;
 	float cx, cy, cz;
