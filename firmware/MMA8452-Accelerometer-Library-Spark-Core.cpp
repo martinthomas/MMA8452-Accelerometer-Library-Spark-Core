@@ -43,26 +43,26 @@ MMA8452Q::MMA8452Q(byte addr)
 byte MMA8452Q::init(MMA8452Q_Scale fsr, MMA8452Q_ODR odr)
 {
 	scale = fsr; // Haul fsr into our class variable, scale
-	
+
 	Wire.begin(); // Initialize I2C
-	
+
 	byte c = readRegister(WHO_AM_I);  // Read WHO_AM_I register
-	
+
 	if (c != 0x2A) // WHO_AM_I should always be 0x2A
 	{
 		return 0;
 	}
-	
+
 	standby();  // Must be in standby to change registers
-	
+
 	setScale(scale);  // Set up accelerometer scale
 	setODR(odr);  // Set up output data rate
 	setupPL();  // Set up portrait/landscape detection
 	// Multiply parameter by 0.0625g to calculate threshold.
 	setupTap(0x80, 0x80, 0x08); // Disable x, y, set z to 0.5g
-	
+
 	active();  // Set to active to start reading
-	
+
 	return 1;
 }
 
@@ -73,18 +73,29 @@ byte MMA8452Q::init(MMA8452Q_Scale fsr, MMA8452Q_ODR odr)
 //		  of the acceleromter.
 //		* floats cx, cy, and cz will store the calculated acceleration from
 //		  those 12-bit values. These variables are in units of g's.
+
+inline void MMA8452Q::convertRaw(byte msb, byte lsb, short& v, float& f)
+{
+    v = ((msb << 8) & 0xff00) | lsb;
+	v >>= 4;
+    if (v > 0x7ff)
+	{
+		v = (0xfff & ~v) + 1;
+		v = v*-1;
+	}
+	f = v;
+	f = f * scale / (1<<11);
+}
+
 void MMA8452Q::read()
 {
 	byte rawData[6];  // x/y/z accel register data stored here
 
 	readRegisters(OUT_X_MSB, rawData, 6);  // Read the six raw data registers into data array
-	
-	x = ((rawData[0] << 8) & 0xff00) | rawData[1];
-	y = ((rawData[2] << 8) & 0xff00) | rawData[3];
-	z = ((rawData[4] << 8) & 0xff00) | rawData[5];
-	cx = (float) x / (float)(1<<11) * (float)(scale);
-	cy = (float) y / (float)(1<<11) * (float)(scale);
-	cz = (float) z / (float)(1<<11) * (float)(scale);
+
+	convertRaw(rawData[0], rawData[1], x, cx);
+	convertRaw(rawData[2], rawData[3], y, cy);
+	convertRaw(rawData[4], rawData[5], z, cz);
 }
 
 // CHECK IF NEW DATA IS AVAILABLE
@@ -109,7 +120,7 @@ void MMA8452Q::setScale(MMA8452Q_Scale fsr)
 
 // SET THE OUTPUT DATA RATE
 //	This function sets the output data rate of the MMA8452Q.
-//	Possible values for the odr parameter are: ODR_800, ODR_400, ODR_200, 
+//	Possible values for the odr parameter are: ODR_800, ODR_400, ODR_200,
 //	ODR_100, ODR_50, ODR_12, ODR_6, or ODR_1
 void MMA8452Q::setODR(MMA8452Q_ODR odr)
 {
@@ -161,7 +172,7 @@ void MMA8452Q::setupTap(byte xThs, byte yThs, byte zThs)
 }
 
 // READ TAP STATUS
-//	This function returns any taps read by the MMA8452Q. If the function 
+//	This function returns any taps read by the MMA8452Q. If the function
 //	returns no new taps were detected. Otherwise the function will return the
 //	lower 7 bits of the PULSE_SRC register.
 byte MMA8452Q::readTap()
@@ -195,7 +206,7 @@ void MMA8452Q::setupPL()
 byte MMA8452Q::readPL()
 {
 	byte plStat = readRegister(PL_STATUS);
-	
+
 	if (plStat & 0x40) // Z-tilt lockout
 		return LOCKOUT;
 	else // Otherwise return LAPO status
@@ -266,5 +277,5 @@ void MMA8452Q::readRegisters(MMA8452Q_Register reg, byte *buffer, byte len)
 	while(Wire.available() < len); //Hang out until we get the # of bytes we expect
 
 	for(int x = 0 ; x < len ; x++)
-		buffer[x] = Wire.read();    
+		buffer[x] = Wire.read();
 }
