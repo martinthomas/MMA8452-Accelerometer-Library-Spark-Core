@@ -92,21 +92,21 @@ enum MMA8452Q_ODR {ODR_800, ODR_400, ODR_200, ODR_100, ODR_50, ODR_12, ODR_6, OD
 ////////////////////////////////
 class MMA8452Q
 {
-public:	
+public:
     MMA8452Q(byte addr = 0x1D); // Constructor
-	
+
 	byte init(MMA8452Q_Scale fsr = SCALE_2G, MMA8452Q_ODR odr = ODR_800);
     void read();
 	byte available();
 	byte readTap();
 	byte readPL();
-	
-    int x, y, z;
+
+    int16_t x, y, z;
 	float cx, cy, cz;
 private:
 	byte address;
 	MMA8452Q_Scale scale;
-	
+
 	void standby();
 	void active();
 	void setupPL();
@@ -117,6 +117,8 @@ private:
     void writeRegisters(MMA8452Q_Register reg, byte *buffer, byte len);
 	byte readRegister(MMA8452Q_Register reg);
     void readRegisters(MMA8452Q_Register reg, byte *buffer, byte len);
+	void convertRaw(byte msb, byte lsb, short& v, float& f);
+
 };
 
 #endif
