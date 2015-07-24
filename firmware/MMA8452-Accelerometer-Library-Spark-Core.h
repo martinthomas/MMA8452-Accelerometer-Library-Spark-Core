@@ -104,7 +104,7 @@ public:
 	byte available();
 	byte readTap();
 	byte readPL();
-	bool readMotion();
+	bool readMotion(uint8_t result);
 
     int16_t x, y, z;
 	float cx, cy, cz;
@@ -116,7 +116,7 @@ private:
 	void active();
 	void setupPL();
 	void setupTap(byte xThs, byte yThs, byte zThs);
-	void setupMotion();
+	void setupMotion(bool motion, uint8_t axis, bool latch);
 	void setupMotionThresh(uint8_t thresh, uint8_t bounces, bool debouncemode);
 	void setScale(MMA8452Q_Scale fsr);
 	void setODR(MMA8452Q_ODR odr);
