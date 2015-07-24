@@ -87,6 +87,10 @@ enum MMA8452Q_ODR {ODR_800, ODR_400, ODR_200, ODR_100, ODR_50, ODR_12, ODR_6, OD
 #define LANDSCAPE_L 3
 #define LOCKOUT 0x40
 
+#define X_AXIS 1
+#define Y_AXIS 2
+#define Z_AXIS 4
+
 ////////////////////////////////
 // MMA8452Q Class Declaration //
 ////////////////////////////////
@@ -100,17 +104,20 @@ public:
 	byte available();
 	byte readTap();
 	byte readPL();
+	bool readMotion();
 
     int16_t x, y, z;
 	float cx, cy, cz;
 private:
 	byte address;
 	MMA8452Q_Scale scale;
-
+    float divisor;
 	void standby();
 	void active();
 	void setupPL();
 	void setupTap(byte xThs, byte yThs, byte zThs);
+	void setupMotion();
+	void setupMotionThresh(uint8_t thresh, uint8_t bounces, bool debouncemode);
 	void setScale(MMA8452Q_Scale fsr);
 	void setODR(MMA8452Q_ODR odr);
 	void writeRegister(MMA8452Q_Register reg, byte data);

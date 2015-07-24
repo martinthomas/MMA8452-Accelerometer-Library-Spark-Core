@@ -43,7 +43,7 @@ MMA8452Q::MMA8452Q(byte addr)
 byte MMA8452Q::init(MMA8452Q_Scale fsr, MMA8452Q_ODR odr)
 {
 	scale = fsr; // Haul fsr into our class variable, scale
-
+    divisor = 1;
 	Wire.begin(); // Initialize I2C
 
 	byte c = readRegister(WHO_AM_I);  // Read WHO_AM_I register
@@ -84,7 +84,7 @@ inline void MMA8452Q::convertRaw(byte msb, byte lsb, short& v, float& f)
 		v = v*-1;
 	}
 	f = v;
-	f = f * scale / (1<<11);
+	f = f * divisor;
 }
 
 void MMA8452Q::read()
@@ -116,6 +116,30 @@ void MMA8452Q::setScale(MMA8452Q_Scale fsr)
 	cfg &= 0xFC; // Mask out scale bits
 	cfg |= (fsr >> 2);  // Neat trick, see page 22. 00 = 2G, 01 = 4A, 10 = 8G
 	writeRegister(XYZ_DATA_CFG, cfg);
+	// recalculate the divisor once here instead of each time it is used
+	divisor = fsr / (1<<11);
+}
+
+void MMA8452Q::setupMotion(bool motion, uint8_t axis, bool latch)
+{
+	axis = (axis & X_AXIS & Y_AXIS & Z_AXIS) << 3;
+	latch =<< 7;
+	motion =<< 6;
+	writeRegister(FF_MT_CFG, latch | motion | axis);
+}
+
+void MMA8452Q::setupMotionThresh(uint8_t thresh, uint8_t bounces, bool debouncemode)
+{
+	thresh = thresh < 127 ? thresh:127;
+	debouncemode =<< 7;
+	writeRegister(FF_MT_THS, debouncemode | thresh);
+	writeRegister(FF_MT_COUNT, bounces);
+}
+
+bool readMotion(uint8_t result)
+{
+    result = readRegister(FF_MT_SRC);
+    return result & 0x80;
 }
 
 // SET THE OUTPUT DATA RATE
