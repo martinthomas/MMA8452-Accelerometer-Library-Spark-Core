@@ -117,7 +117,7 @@ void MMA8452Q::setScale(MMA8452Q_Scale fsr)
 	cfg |= (fsr >> 2);  // Neat trick, see page 22. 00 = 2G, 01 = 4A, 10 = 8G
 	writeRegister(XYZ_DATA_CFG, cfg);
 	// recalculate the divisor once here instead of each time it is used
-	divisor = fsr / (1<<11);
+	divisor = (float)fsr / (1<<11);
 }
 
 void MMA8452Q::setupMotion(bool motion, uint8_t axis, bool latch)
