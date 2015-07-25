@@ -125,7 +125,7 @@ void MMA8452Q::setupMotion(bool motion, uint8_t axis, bool latch)
 {
 	axis = (axis & X_AXIS & Y_AXIS & Z_AXIS) << 3;
 	latch = latch << 7;
-	motion = latch << 6;
+	motion = motion << 6;
 	writeRegister(FF_MT_CFG, latch | motion | axis);
 }
 
@@ -139,13 +139,13 @@ void MMA8452Q::setupMotionThresh(uint8_t thresh, uint8_t bounces, bool debouncem
 
 byte MMA8452Q::readMotion()
 {
-	byte result = readRegister(FF_MT_SRC);
+    byte result = readRegister(FF_MT_SRC);
     if (result & 0x80) // Read EA bit to check if a interrupt was generated
-	{
-		return result & 0x7F;
-	}
-	else
-		return 0;
+    {
+        return result & 0x7F;
+    }
+    else
+        return 0;
 }
 
 // SET THE OUTPUT DATA RATE
