@@ -60,7 +60,7 @@ byte MMA8452Q::init(MMA8452Q_Scale fsr, MMA8452Q_ODR odr)
 	setupPL();  // Set up portrait/landscape detection
 	// Multiply parameter by 0.0625g to calculate threshold.
 	setupTap(0x80, 0x80, 0x08); // Disable x, y, set z to 0.5g
-	setupMotion(true, X_AXIS|Y_AXIS|Z_AXIS, true); // detect mtotion (not freefall), all axes, latch on detect
+	setupMotion(true, X_AXIS|Y_AXIS, true); // detect motion (not freefall), x/y axes, latch on detect
 	setupMotionThresh(5, 0, 0);
 	active();  // Set to active to start reading
 
